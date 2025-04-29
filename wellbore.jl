@@ -33,7 +33,7 @@ k = 1.0e-3        # Permeability (m^2) - how easily fluid flows through the medi
 mu = 1.0e-3       # Fluid viscosity (Pa·s)
 
 # Loading conditions
-Pb = 31.5e6
+Pb = 30.5e6
 p0 = 20.0e6
 
 # Time stepping parameters
@@ -112,9 +112,9 @@ reffe_p = ReferenceFE(lagrangian, Float64, order_p)                 # Scalar-val
                  dirichlet_tags=["top_bottom"])
 u = TrialFESpace(δu, x -> VectorValue(0.0,0.0))  # Zero displacement at bottom boundary
 
-# Pressure space with Dirichlet BC on left and right sides (drained boundaries)
+# Pressure space with Dirichlet BC on wellbore (drained boundaries)
 δp = TestFESpace(model, reffe_p, conformity=:H1, dirichlet_tags=["wellbore"])
-p = TrialFESpace(δp, 30.0e6)  # Zero pressure at left and right boundaries
+p = TrialFESpace(δp, 30.5e6)  # Zero pressure at wellbore boundaries
 
 # Create multi-field space for the coupled problem
 Y = MultiFieldFESpace([δu, δp])  # Combined test space for displacement and pressure
@@ -198,13 +198,13 @@ a(t, (u,p), (δu,δp)) = ∫(
 ) * dΩ
 
 # Linear form l(δu,δp) - represents external forces/sources
-l(t, (δu,δp)) = ∫( 
-    # Traction force applied at the top boundary
-    δu ⋅ VectorValue(0.0, -F)  # Negative F for compression in y-direction
-) * dΓ_top 
+# l(t, (δu,δp)) = ∫( 
+#     # Traction force applied at the top boundary
+#     δu ⋅ VectorValue(0.0, -F)  # Negative F for compression in y-direction
+# ) * dΓ_top 
 
 # Residual form for the nonlinear solver
-res(t, (u,p), (δu,δp)) = a(t, (u,p), (δu,δp)) - l(t, (δu,δp))
+res(t, (u,p), (δu,δp)) = a(t, (u,p), (δu,δp)) #- l(t, (δu,δp))
 
 # ============================================================================
 # TRANSIENT PROBLEM SETUP
